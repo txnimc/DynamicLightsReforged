@@ -33,11 +33,7 @@ repositories {
     maven { url = "https://jitpack.io" }
     maven {
         name = "grondag"
-        url = "https://grondag-repo.appspot.com"
-        credentials {
-            username "guest"
-            password ""
-        }
+        url 'https://maven.dblsaiko.net/'
     }
     maven {
         name = "Cotton"
@@ -58,12 +54,12 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "com.github.lambdaurora:spruceui:${project.spruceui_version}"
-    include "com.github.lambdaurora:spruceui:${project.spruceui_version}"
+    //modImplementation "com.github.lambdaurora:spruceui:${project.spruceui_version}"
+    //include "com.github.lambdaurora:spruceui:${project.spruceui_version}"
 
-    modImplementation("io.github.prospector:modmenu:${project.modmenu_version}") {
-        transitive = false
-    }
+    //modImplementation("io.github.prospector:modmenu:${project.modmenu_version}") {
+    //    transitive = false
+    //}
     //modImplementation "grondag:canvas-mc116:1.0.+"
     modImplementation "com.github.jellysquid3:sodium-fabric:mc1.16.3-0.1.0"
 
