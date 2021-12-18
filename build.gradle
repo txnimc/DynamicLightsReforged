@@ -26,6 +26,10 @@ repositories {
     maven {
         url = "https://www.cursemaven.com"
     }
+    maven {
+        name = "AperLambda"
+        url = 'https://aperlambda.github.io/maven'
+    }
     mavenCentral()
 }
 
@@ -126,7 +130,9 @@ dependencies {
 
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
+    compileOnly fg.deobf("curse.maven:magnesium-532724:3503910")
     runtimeOnly fg.deobf("curse.maven:magnesium-532724:3503910")
+
     runtimeOnly fg.deobf("curse.maven:jei-238222:3438494")
     runtimeOnly fg.deobf("curse.maven:jer-240630:3066754")
     runtimeOnly fg.deobf("curse.maven:jade-324717:3467445")

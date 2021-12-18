@@ -3,18 +3,24 @@
   "minVersion": "0.8",
   "package": "me.lambdaurora.lambdynlights.mixin",
   "plugin": "me.lambdaurora.lambdynlights.LambDynLightsMixinPlugin",
+  "refmap": "dynamiclightsreforged.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "AbstractDecorationEntityMixin",
+    "AbstractMinecartEntityMixin",
+    "BlockEntityMixin",
     "ClientWorldMixin",
     "CommonWorldRendererMixin",
-    "DebugHudMixin",
-    "EntityLighterMixin",
+    "EntityMixin",
     "EntityRendererMixin",
+    "ExplosiveProjectileEntityMixin",
+    "LivingEntityMixin",
     "MinecraftClientMixin",
-    "VideoOptionsScreenMixin",
+    "PlayerEntityMixin",
+    "TntEntityMixin",
     "WorldMixin",
-    "ltr.LilTaterBlockEntityMixin",
-    "ltr.LilTaterBlocksMixin"
+    "WorldRendererMixin",
+    "sodium.SodiumSettingsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
