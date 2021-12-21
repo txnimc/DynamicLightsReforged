@@ -15,6 +15,7 @@ public class DynamicLightsConfig
     public static ForgeConfigSpec.ConfigValue<Boolean> EntityLighting;
     public static ForgeConfigSpec.ConfigValue<Boolean> TileEntityLighting;
 
+    public static ForgeConfigSpec.ConfigValue<Boolean> OnlyUpdateOnPositionChange;
 
     static
     {
@@ -24,6 +25,7 @@ public class DynamicLightsConfig
             Quality = b.define("Quality Mode (OFF, SLOW, FAST, REALTIME)", "REALTIME");
             EntityLighting = b.define("Dynamic Entity Lighting", true);
             TileEntityLighting = b.define("Dynamic TileEntity Lighting", true);
+            OnlyUpdateOnPositionChange = b.define("Only Update On Position Change", true);
         });
 
         ConfigSpec = builder.Save();

@@ -112,7 +112,26 @@ public class DynamicLightsReforged
     }
 
 
+    private static long lambdynlights_lastUpdate = 0;
 
+    public static boolean ShouldUpdateDynamicLights()
+    {
+        String mode = DynamicLightsConfig.Quality.get();
+        if (Objects.equals(mode, "OFF"))
+            return false;
+
+        long currentTime = System.currentTimeMillis();
+
+        if (Objects.equals(mode, "SLOW") && currentTime < lambdynlights_lastUpdate + 500)
+            return false;
+
+
+        if (Objects.equals(mode, "FAST") && currentTime < lambdynlights_lastUpdate + 200)
+            return false;
+
+        lambdynlights_lastUpdate = currentTime;
+        return true;
+    }
 
 
     /**

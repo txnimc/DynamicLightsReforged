@@ -121,32 +121,7 @@ public abstract class EntityMixin implements DynamicLightSource {
 
     @Override
     public boolean shouldUpdateDynamicLight() {
-        String mode = DynamicLightsConfig.Quality.get();
-
-        if (Objects.equals(mode, "OFF"))
-            return false;
-
-        if (Objects.equals(mode, "SLOW"))
-        {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime < this.lambdynlights_lastUpdate + 500) {
-                return false;
-            }
-
-            this.lambdynlights_lastUpdate = currentTime;
-        }
-
-        if (Objects.equals(mode, "FAST"))
-        {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime < this.lambdynlights_lastUpdate + 200) {
-                return false;
-            }
-
-            this.lambdynlights_lastUpdate = currentTime;
-        }
-
-        return true;
+        return DynamicLightsReforged.ShouldUpdateDynamicLights();
     }
 
     @Override
@@ -173,7 +148,17 @@ public abstract class EntityMixin implements DynamicLightSource {
 
         int luminance = this.getLuminance();
 
-        if (Math.abs(deltaX) > 0.1D || Math.abs(deltaY) > 0.1D || Math.abs(deltaZ) > 0.1D || luminance != this.lambdynlights_lastLuminance) {
+
+        double minDelta = 0D;
+        String mode = DynamicLightsConfig.Quality.get();
+        if (Objects.equals(mode, "SLOW"))
+            minDelta = 0.5D;
+
+        if (Objects.equals(mode, "FAST") )
+            minDelta = 0.20D;
+
+
+        if (Math.abs(deltaX) > minDelta || Math.abs(deltaY) > minDelta || Math.abs(deltaZ) > minDelta || luminance != this.lambdynlights_lastLuminance) {
             this.lambdynlights_prevX = this.getX();
             this.lambdynlights_prevY = this.getY();
             this.lambdynlights_prevZ = this.getZ();

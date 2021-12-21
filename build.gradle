@@ -130,8 +130,8 @@ dependencies {
 
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("curse.maven:magnesium-532724:3503910")
-    runtimeOnly fg.deobf("curse.maven:magnesium-532724:3503910")
+    compileOnly fg.deobf("curse.maven:magnesium-532724:3526076")
+    runtimeOnly fg.deobf("curse.maven:magnesium-532724:3526076")
 
     runtimeOnly fg.deobf("curse.maven:jei-238222:3438494")
     runtimeOnly fg.deobf("curse.maven:jer-240630:3066754")
@@ -146,6 +146,14 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:engineers-313866:3390489")
     runtimeOnly fg.deobf("curse.maven:immersive-231951:3497359")
     runtimeOnly fg.deobf("curse.maven:patchouli-306770:3459118")
+    runtimeOnly fg.deobf("curse.maven:kotrt-543308:3571155")
+
+    runtimeOnly fg.deobf("curse.maven:architecury-419699:3570507")
+    runtimeOnly fg.deobf("curse.maven:ftbteams-404468:3535953")
+    runtimeOnly fg.deobf("curse.maven:ftbranks-314905:3530024")
+    runtimeOnly fg.deobf("curse.maven:ftbchunks-314906:3538223")
+
+    runtimeOnly fg.deobf("curse.maven:ftblibrary-404465:3553840")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
 }

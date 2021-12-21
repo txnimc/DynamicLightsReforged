@@ -109,32 +109,7 @@ public abstract class BlockEntityMixin implements DynamicLightSource
     @Override
     public boolean shouldUpdateDynamicLight()
     {
-        String mode = DynamicLightsConfig.Quality.get();
-
-        if (Objects.equals(mode, "OFF"))
-            return false;
-
-        if (Objects.equals(mode, "SLOW"))
-        {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime < this.lambdynlights_lastUpdate + 500) {
-                return false;
-            }
-
-            this.lambdynlights_lastUpdate = currentTime;
-        }
-
-        if (Objects.equals(mode, "FAST"))
-        {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime < this.lambdynlights_lastUpdate + 200) {
-                return false;
-            }
-
-            this.lambdynlights_lastUpdate = currentTime;
-        }
-
-        return true;
+        return DynamicLightsReforged.ShouldUpdateDynamicLights();
     }
 
     @Override

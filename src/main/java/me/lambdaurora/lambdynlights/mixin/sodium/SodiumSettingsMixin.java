@@ -3,6 +3,7 @@ package me.lambdaurora.lambdynlights.mixin.sodium;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
 import me.jellysquid.mods.sodium.client.gui.options.*;
 import me.jellysquid.mods.sodium.client.gui.options.control.CyclingControl;
 
@@ -11,10 +12,14 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage
 import me.lambdaurora.lambdynlights.DynamicLightsReforged;
 import me.lambdaurora.lambdynlights.config.DynamicLightsConfig;
 import me.lambdaurora.lambdynlights.config.QualityMode;
+import net.minecraft.client.gui.screen.Screen;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -22,20 +27,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Pseudo
-@Mixin(SodiumGameOptionPages.class)
+@Mixin(SodiumOptionsGUI.class)
 public abstract class SodiumSettingsMixin {
+
+    @Shadow
+    @Final
+    private List<OptionPage> pages;
 
     private static final SodiumOptionsStorage dynamicLightsOpts = new SodiumOptionsStorage();
 
 
-    @Inject(
-            method = "experimental",
-            at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"),
-            locals = LocalCapture.CAPTURE_FAILHARD,
-            remap = false
-    )
-    private static void DynamicLights(CallbackInfoReturnable<OptionPage> cir, List<OptionGroup> groups)
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void DynamicLights(Screen prevScreen, CallbackInfo ci)
     {
+        List<OptionGroup> groups = new ArrayList<>();
+
         OptionImpl<SodiumGameOptions, QualityMode> qualityMode = OptionImpl.createBuilder(QualityMode.class, dynamicLightsOpts)
                 .setName("Dynamic Lights Speed")
                 .setTooltip("Controls how often dynamic lights will update. " +
@@ -82,6 +88,8 @@ public abstract class SodiumSettingsMixin {
                 .add(tileEntityLighting)
             .build()
         );
+
+        pages.add(new OptionPage("Dynamic Lights", ImmutableList.copyOf(groups)));
     }
 
 
