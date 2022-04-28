@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Objects;
+
 @Mixin(Entity.class)
 public abstract class EntityMixin implements DynamicLightSource {
 	@Shadow
@@ -125,9 +127,26 @@ public abstract class EntityMixin implements DynamicLightSource {
 		this.lambdynlights$lastLuminance = 0;
 	}
 
+
+	private static long lambdynlights_lastUpdate = 0;
+
 	@Override
 	public boolean shouldUpdateDynamicLight() {
-		return LambDynLights.ShouldUpdateDynamicLights();
+		var mode = DynamicLightsConfig.Quality.get();
+		if (Objects.equals(mode, QualityMode.OFF))
+			return false;
+
+		long currentTime = System.currentTimeMillis();
+
+		if (Objects.equals(mode, QualityMode.SLOW) && currentTime < lambdynlights_lastUpdate + 500)
+			return false;
+
+
+		if (Objects.equals(mode, QualityMode.FAST) && currentTime < lambdynlights_lastUpdate + 200)
+			return false;
+
+		lambdynlights_lastUpdate = currentTime;
+		return true;
 	}
 
 	@Override
