@@ -10,12 +10,14 @@
 package dev.lambdaurora.lambdynlights.api;
 
 import dev.lambdaurora.lambdynlights.LambDynLights;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.CreeperEntity;
+import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Represents a dynamic light handler.
@@ -76,8 +78,8 @@ public interface DynamicLightHandler<T> {
 	static <T extends LivingEntity> @NotNull DynamicLightHandler<T> makeLivingEntityHandler(@NotNull DynamicLightHandler<T> handler) {
 		return entity -> {
 			int luminance = 0;
-			for (var equipped : entity.getItemsEquipped()) {
-				luminance = Math.max(luminance, LambDynLights.getLuminanceFromItemStack(equipped, entity.isSubmergedInWater()));
+			for (var equipped : entity.getAllSlots()) {
+				luminance = Math.max(luminance, LambDynLights.getLuminanceFromItemStack(equipped, entity.isUnderWater()));
 			}
 			return Math.max(luminance, handler.getLuminance(entity));
 		};
@@ -90,17 +92,17 @@ public interface DynamicLightHandler<T> {
 	 * @param <T> The type of Creeper entity.
 	 * @return The completed handler.
 	 */
-	static <T extends CreeperEntity> @NotNull DynamicLightHandler<T> makeCreeperEntityHandler(@Nullable DynamicLightHandler<T> handler) {
+	static <T extends Creeper> @NotNull DynamicLightHandler<T> makeCreeperEntityHandler(@Nullable DynamicLightHandler<T> handler) {
 		return new DynamicLightHandler<>() {
 			@Override
 			public int getLuminance(T entity) {
 				int luminance = 0;
 
-				if (entity.getClientFuseTime(0.f) > 0.001) {
-					luminance = switch (LambDynLights.get().config.getCreeperLightingMode()) {
+				if (entity.getSwelling(0.f) > 0.001) {
+					luminance = switch (DynamicLightsConfig.Quality.get()) {
 						case OFF -> 0;
-						case SIMPLE -> 10;
-						case FANCY -> (int) (entity.getClientFuseTime(0.f) * 10.0);
+						case SLOW, FAST -> 10;
+						case REALTIME -> (int) (entity.getSwelling(0.f) * 10.0);
 					};
 				}
 

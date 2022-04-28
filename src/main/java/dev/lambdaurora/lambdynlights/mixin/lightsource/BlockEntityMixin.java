@@ -12,14 +12,16 @@ package dev.lambdaurora.lambdynlights.mixin.lightsource;
 import dev.lambdaurora.lambdynlights.DynamicLightSource;
 import dev.lambdaurora.lambdynlights.LambDynLights;
 import dev.lambdaurora.lambdynlights.api.DynamicLightHandlers;
+import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
+import dev.lambdaurora.lambdynlights.config.QualityMode;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -34,14 +36,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class BlockEntityMixin implements DynamicLightSource {
 	@Final
 	@Shadow
-	protected BlockPos pos;
+	protected BlockPos worldPosition;
 
 	@Shadow
 	@Nullable
-	protected World world;
+	protected Level level;
 
 	@Shadow
-	protected boolean removed;
+	protected boolean remove;
 
 	@Unique
 	private int luminance = 0;
@@ -54,25 +56,25 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 
 	@Override
 	public double getDynamicLightX() {
-		return this.pos.getX() + 0.5;
+		return this.worldPosition.getX() + 0.5;
 	}
 
 	@Override
 	public double getDynamicLightY() {
-		return this.pos.getY() + 0.5;
+		return this.worldPosition.getY() + 0.5;
 	}
 
 	@Override
 	public double getDynamicLightZ() {
-		return this.pos.getZ() + 0.5;
+		return this.worldPosition.getZ() + 0.5;
 	}
 
 	@Override
-	public World getDynamicLightWorld() {
-		return this.world;
+	public Level getDynamicLightWorld() {
+		return this.level;
 	}
 
-	@Inject(method = "markRemoved", at = @At("TAIL"))
+	@Inject(method = "setRemoved", at = @At("TAIL"))
 	private void onRemoved(CallbackInfo ci) {
 		this.setDynamicLightEnabled(false);
 	}
@@ -85,9 +87,9 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 	@Override
 	public void dynamicLightTick() {
 		// We do not want to update the entity on the server.
-		if (this.world == null || !this.world.isClient())
+		if (this.level == null || !this.level.isClientSide())
 			return;
-		if (!this.removed) {
+		if (!this.remove) {
 			this.luminance = DynamicLightHandlers.getLuminanceFrom((BlockEntity) (Object) this);
 			LambDynLights.updateTracking(this);
 
@@ -104,22 +106,11 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 
 	@Override
 	public boolean shouldUpdateDynamicLight() {
-		var mode = LambDynLights.get().config.getDynamicLightsMode();
-		if (!mode.isEnabled())
-			return false;
-		if (mode.hasDelay()) {
-			long currentTime = System.currentTimeMillis();
-			if (currentTime < this.lastUpdate + mode.getDelay()) {
-				return false;
-			}
-
-			this.lastUpdate = currentTime;
-		}
-		return true;
+		return LambDynLights.ShouldUpdateDynamicLights();
 	}
 
 	@Override
-	public boolean lambdynlights$updateDynamicLight(@NotNull WorldRenderer renderer) {
+	public boolean lambdynlights$updateDynamicLight(@NotNull LevelRenderer renderer) {
 		if (!this.shouldUpdateDynamicLight())
 			return false;
 
@@ -129,15 +120,15 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 			this.lastLuminance = luminance;
 
 			if (this.lambdynlights$trackedLitChunkPos.isEmpty()) {
-				var chunkPos = new BlockPos.Mutable(MathHelper.floorDiv(this.pos.getX(), 16),
-						MathHelper.floorDiv(this.pos.getY(), 16),
-						MathHelper.floorDiv(this.pos.getZ(), 16));
+				var chunkPos = new BlockPos.MutableBlockPos(Mth.intFloorDiv(this.worldPosition.getX(), 16),
+						Mth.intFloorDiv(this.worldPosition.getY(), 16),
+						Mth.intFloorDiv(this.worldPosition.getZ(), 16));
 
 				LambDynLights.updateTrackedChunks(chunkPos, null, this.lambdynlights$trackedLitChunkPos);
 
-				var directionX = (this.pos.getX() & 15) >= 8 ? Direction.EAST : Direction.WEST;
-				var directionY = (this.pos.getY() & 15) >= 8 ? Direction.UP : Direction.DOWN;
-				var directionZ = (this.pos.getZ() & 15) >= 8 ? Direction.SOUTH : Direction.NORTH;
+				var directionX = (this.worldPosition.getX() & 15) >= 8 ? Direction.EAST : Direction.WEST;
+				var directionY = (this.worldPosition.getY() & 15) >= 8 ? Direction.UP : Direction.DOWN;
+				var directionZ = (this.worldPosition.getZ() & 15) >= 8 ? Direction.SOUTH : Direction.NORTH;
 
 				for (int i = 0; i < 7; i++) {
 					if (i % 4 == 0) {
@@ -162,8 +153,8 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 	}
 
 	@Override
-	public void lambdynlights$scheduleTrackedChunksRebuild(@NotNull WorldRenderer renderer) {
-		if (this.world == MinecraftClient.getInstance().world)
+	public void lambdynlights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer) {
+		if (this.level == Minecraft.getInstance().level)
 			for (long pos : this.lambdynlights$trackedLitChunkPos) {
 				LambDynLights.scheduleChunkRebuild(renderer, pos);
 			}

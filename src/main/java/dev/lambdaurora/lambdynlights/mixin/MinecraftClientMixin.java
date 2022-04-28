@@ -10,8 +10,8 @@
 package dev.lambdaurora.lambdynlights.mixin;
 
 import dev.lambdaurora.lambdynlights.LambDynLights;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,10 +26,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @version 1.3.2
  * @since 1.3.2
  */
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public class MinecraftClientMixin {
-	@Inject(method = "setWorld", at = @At("HEAD"))
-	private void onSetWorld(ClientWorld world, CallbackInfo ci) {
+	@Inject(method = "setLevel", at = @At("HEAD"))
+	private void onSetWorld(ClientLevel world, CallbackInfo ci) {
 		LambDynLights.get().clearLightSources();
 	}
 }

@@ -10,12 +10,11 @@
 package dev.lambdaurora.lambdynlights.accessor;
 
 import dev.lambdaurora.lambdynlights.api.DynamicLightHandler;
-import dev.lambdaurora.lambdynlights.config.LightSourceSettingEntry;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,9 +25,7 @@ public interface DynamicLightHandlerHolder<T> {
 
 	void lambdynlights$setDynamicLightHandler(DynamicLightHandler<T> handler);
 
-	LightSourceSettingEntry lambdynlights$getSetting();
-
-	Text lambdynlights$getName();
+	Component lambdynlights$getName();
 
 	@SuppressWarnings("unchecked")
 	static <T extends Entity> DynamicLightHandlerHolder<T> cast(EntityType<T> entityType) {

@@ -12,11 +12,13 @@ package dev.lambdaurora.lambdynlights.mixin.lightsource;
 import dev.lambdaurora.lambdynlights.DynamicLightSource;
 import dev.lambdaurora.lambdynlights.LambDynLights;
 import dev.lambdaurora.lambdynlights.api.DynamicLightHandlers;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -25,24 +27,24 @@ public abstract class LivingEntityMixin extends Entity implements DynamicLightSo
 	@Unique
 	protected int lambdynlights$luminance;
 
-	public LivingEntityMixin(EntityType<?> type, World world) {
+	public LivingEntityMixin(EntityType<?> type, Level world) {
 		super(type, world);
 	}
 
 	@Override
 	public void dynamicLightTick() {
-		if (!LambDynLights.get().config.getEntitiesLightSource().get() || !DynamicLightHandlers.canLightUp(this)) {
+		if (!DynamicLightsConfig.TileEntityLighting.get() || !DynamicLightHandlers.canLightUp(this)) {
 			this.lambdynlights$luminance = 0;
 			return;
 		}
 
-		if (this.isOnFire() || this.isGlowing()) {
+		if (this.isOnFire() || this.isCurrentlyGlowing()) {
 			this.lambdynlights$luminance = 15;
 		} else {
 			int luminance = 0;
 			var eyePos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
-			boolean submergedInFluid = !this.world.getFluidState(eyePos).isEmpty();
-			for (var equipped : this.getItemsEquipped()) {
+			boolean submergedInFluid = !this.level.getFluidState(eyePos).isEmpty();
+			for (var equipped : this.getAllSlots()) {
 				if (!equipped.isEmpty())
 					luminance = Math.max(luminance, LambDynLights.getLuminanceFromItemStack(equipped, submergedInFluid));
 			}

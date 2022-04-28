@@ -25,5 +25,5 @@ public interface WorldRendererAccessor {
 	 * @param z Z coordinates of the chunk
 	 * @param important {@code true} if important, else {@code false}
 	 */
-	void lambdynlights$scheduleChunkRebuild(int x, int y, int z, boolean important);
+	void dynlights_setSectionDirty(int x, int y, int z, boolean important);
 }

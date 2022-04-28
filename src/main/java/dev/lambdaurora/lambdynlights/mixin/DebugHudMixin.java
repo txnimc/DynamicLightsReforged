@@ -10,14 +10,14 @@
 package dev.lambdaurora.lambdynlights.mixin;
 
 import dev.lambdaurora.lambdynlights.LambDynLights;
-import net.minecraft.client.gui.hud.DebugHud;
-import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
 
 /**
  * Adds a debug string for dynamic light sources tracking and updates.
@@ -26,9 +26,9 @@ import java.util.List;
  * @version 1.3.2
  * @since 1.3.2
  */
-@Mixin(DebugHud.class)
+@Mixin(DebugScreenOverlay.class)
 public class DebugHudMixin {
-	@Inject(method = "getLeftText", at = @At("RETURN"))
+	@Inject(method = "getGameInformation", at = @At("RETURN"))
 	private void onGetLeftText(CallbackInfoReturnable<List<String>> cir) {
 		var list = cir.getReturnValue();
 		var ldl = LambDynLights.get();
@@ -37,11 +37,11 @@ public class DebugHudMixin {
 				.append(" (U: ")
 				.append(ldl.getLastUpdateCount());
 
-		if (!ldl.config.getDynamicLightsMode().isEnabled()) {
+		if (!LambDynLights.isEnabled()) {
 			builder.append(" ; ");
-			builder.append(Formatting.RED);
+			builder.append(ChatFormatting.RED);
 			builder.append("Disabled");
-			builder.append(Formatting.RESET);
+			builder.append(ChatFormatting.RESET);
 		}
 
 		builder.append(')');

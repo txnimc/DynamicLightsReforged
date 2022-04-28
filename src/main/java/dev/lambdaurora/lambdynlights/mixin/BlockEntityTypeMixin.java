@@ -12,12 +12,11 @@ package dev.lambdaurora.lambdynlights.mixin;
 import dev.lambdaurora.lambdynlights.LambDynLights;
 import dev.lambdaurora.lambdynlights.accessor.DynamicLightHandlerHolder;
 import dev.lambdaurora.lambdynlights.api.DynamicLightHandler;
-import dev.lambdaurora.lambdynlights.config.LightSourceSettingEntry;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,8 +25,6 @@ import org.spongepowered.asm.mixin.Unique;
 public class BlockEntityTypeMixin<T extends BlockEntity> implements DynamicLightHandlerHolder<T> {
 	@Unique
 	private DynamicLightHandler<T> lambdynlights$lightHandler;
-	@Unique
-	private LightSourceSettingEntry lambdynlights$setting;
 
 	@Override
 	public @Nullable DynamicLightHandler<T> lambdynlights$getDynamicLightHandler() {
@@ -40,30 +37,12 @@ public class BlockEntityTypeMixin<T extends BlockEntity> implements DynamicLight
 	}
 
 	@Override
-	public LightSourceSettingEntry lambdynlights$getSetting() {
-		if (this.lambdynlights$setting == null) {
-			var self = (BlockEntityType<?>) (Object) this;
-			var id = Registry.BLOCK_ENTITY_TYPE.getId(self);
-			if (id == null) {
-				return null;
-			}
-
-			this.lambdynlights$setting = new LightSourceSettingEntry("light_sources.settings.block_entities."
-					+ id.getNamespace() + '.' + id.getPath().replace('/', '.'),
-					true, null, null);
-			LambDynLights.get().config.load(this.lambdynlights$setting);
-		}
-
-		return this.lambdynlights$setting;
-	}
-
-	@Override
-	public Text lambdynlights$getName() {
+	public Component lambdynlights$getName() {
 		var self = (BlockEntityType<?>) (Object) this;
-		var id = Registry.BLOCK_ENTITY_TYPE.getId(self);
+		var id = Registry.BLOCK_ENTITY_TYPE.getKey(self);
 		if (id == null) {
-			return LiteralText.EMPTY;
+			return TextComponent.EMPTY;
 		}
-		return new LiteralText(id.getNamespace() + ':' + id.getPath());
+		return new TextComponent(id.getNamespace() + ':' + id.getPath());
 	}
 }

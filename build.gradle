@@ -1,247 +1,180 @@
-plugins {
-    id 'fabric-loom' version '0.10.+'
-    id 'io.github.juuxel.loom-quiltflower-mini' version '1.1.0'
-    id 'java-library'
-    id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
-    id 'org.cadixdev.licenser' version '0.6.1'
-    id 'com.modrinth.minotaur' version '1.2.+'
-}
-
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.modrinth.minotaur.TaskModrinthUpload
-import com.modrinth.minotaur.request.VersionType
-import com.modrinth.minotaur.responses.ResponseError
-import net.fabricmc.loom.task.RemapJarTask
-import org.apache.http.client.config.CookieSpecs
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.entity.EntityBuilder
-import org.apache.http.client.methods.HttpPatch
-import org.apache.http.entity.ContentType
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.util.EntityUtils
-
-group = project.maven_group
-version = "${project.mod_version}+${getMCVersionString()}"
-archivesBaseName = project.archives_base_name
-
-// This field defines the Java version your mod target.
-def targetJavaVersion = 16
-
-boolean isMCVersionNonRelease() {
-    return project.minecraft_version.matches('^\\d\\dw\\d\\d[a-z]$')
-            || project.minecraft_version.matches('\\d+\\.\\d+-(pre|rc)(\\d+)')
-}
-
-String getMCVersionString() {
-    if (isMCVersionNonRelease()) {
-        return project.minecraft_version
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+        jcenter()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven {
+            name 'parchment'
+            url 'https://maven.parchmentmc.org'
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
-    def version = project.minecraft_version.split('\\.')
-    return version[0] + '.' + version[1]
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: "${mixingradle_version}"
+        classpath 'org.parchmentmc:librarian:1.+'
+        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.4.0"
+    }
 }
 
-String parseReadme() {
-    def excludeRegex = /(?m)<!-- modrinth_exclude\.start -->(.|\n)*?<!-- modrinth_exclude\.end -->/
-    def linkRegex = /!\[([A-z_ ]+)]\((images\/[A-z.\/_]+)\)/
+apply plugin: "com.matthewprenger.cursegradle"
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
-    def readme = (String) file('README.md').text
-    readme = readme.replaceAll(excludeRegex, '')
-    readme = readme.replaceAll(linkRegex, '![$1](https://raw.githubusercontent.com/LambdAurora/LambDynamicLights/1.17/$2)')
-    return readme
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+
+boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equals('false');
+
+ext.buildnumber = 0
+project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : "custom"
+
+version = "${minecraft_version}_v${mod_version}" + (dev && !buildnumber.equals("custom") ? "+${buildnumber}" : '')
+group = 'vice.' + String.valueOf(mod_id)
+archivesBaseName = String.valueOf(mod_id)
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: "${mappings_channel}", version: "${mappings_version}"
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            arg '-mixin.config=' + String.valueOf(mod_id) + '.mixins.json'
+
+            //jvmArgs '-XX:+UnlockCommercialFeatures' // uncomment for profiling
+            property 'forge.logging.console.level', 'info'
+            property 'fml.earlyprogresswindow', 'false'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                dynamiclightsreforged {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+            arg '-mixin.config=' + String.valueOf(mod_id) + '.mixins.json'
+            property 'forge.logging.console.level', 'info'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                dynamiclightsreforged {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            property 'fml.earlyprogresswindow', 'false'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            args '--mod', String.valueOf(mod_id), '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
+            mods {
+                dynamiclightsreforged {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+compileJava {
+    options.compilerArgs = ["-Xdiags:verbose"]
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+}
+
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
 }
 
 repositories {
-    mavenLocal()
+    maven {
+        // Location of the maven for mixed mappings, Registrate, and Flywheel
+        name = "tterrag maven"
+        url = "https://maven.tterrag.com/"
+    }
+    maven {
+        url = "https://www.cursemaven.com"
+    }
+    maven {
+        url = "https://www.cursemaven.com"
+    }
     mavenCentral()
-    maven {
-        name 'Terraformers'
-        url 'https://maven.terraformersmc.com/releases/'
-    }
-    maven {
-        name 'Gegy'
-        url 'https://maven.gegy.dev'
-    }
-    maven {
-        name 'grondag'
-        url 'https://maven.dblsaiko.net/'
-    }
-}
-
-configurations {
-    shadow
-    api.extendsFrom shadow
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation fg.deobf("curse.maven:rubidium-574856:3749094")
+    //runtimeOnly fg.deobf("curse.maven:oculus-581495:3770744")
+    runtimeOnly fg.deobf("curse.maven:create-328085:3737418")
+    runtimeOnly fg.deobf("curse.maven:flywheel-486392:3737402")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:3758750")
 
-    modImplementation include("dev.lambdaurora:spruceui:${project.spruceui_version}")
-    modImplementation include("io.github.queerbric:pridelib:${project.pridelib_version}")
-
-    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}") {
-        transitive = false
-    }
-
-    shadow 'com.electronwill.night-config:core:3.6.3'
-    shadow 'com.electronwill.night-config:toml:3.6.3'
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion(targetJavaVersion)
-    targetCompatibility = JavaVersion.toVersion(targetJavaVersion)
-
-    withSourcesJar()
-}
-
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = 'UTF-8'
-
-    it.options.release.set(targetJavaVersion)
-}
-
-processResources {
-    inputs.property 'version', project.version
-
-    filesMatching('fabric.mod.json') {
-        expand 'version': project.version
-    }
+    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
 }
 
 jar {
-    from('LICENSE') {
-        rename { "${it}_${project.archivesBaseName}" }
+    manifest {
+        attributes([
+                "Specification-Title": "${mod_id}",
+                "Specification-Vendor": "vice",
+                "Specification-Version": "1",
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"vice",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "${mod_id}.mixins.json"
+        ])
     }
 }
 
-license {
-    header file('HEADER')
-    include '**/*.java'
+jar.finalizedBy('reobfJar')
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveBaseName.set(project.archivesBaseName)
+    archiveVersion.set("${project.version}")
+    archiveClassifier.set('sources')
 }
 
-shadowJar {
-    dependsOn jar
-    configurations = [project.configurations.shadow]
-    archiveClassifier.set('dev')
-
-    relocate 'com.electronwill.nightconfig', 'dev.lambdaurora.lambdynlights.shadow.nightconfig'
-}
-remapJar.dependsOn(shadowJar)
-
-task shadowRemapJar(type: RemapJarTask) {
-    dependsOn shadowJar
-
-    input.set(file("${project.buildDir}/libs/$archivesBaseName-${project.version}-dev.jar"))
-    archiveFileName = "${archivesBaseName}-${project.version}.jar"
-    addNestedDependencies.set(true)
-}
-build.dependsOn(shadowRemapJar)
-
-task publishModrinth(type: TaskModrinthUpload) {
-    dependsOn(build)
-    onlyIf {
-        System.getenv('MODRINTH_TOKEN')
-    }
-
-    token = System.getenv('MODRINTH_TOKEN')
-    projectId = project.modrinth_id
-    versionNumber = version
-    versionName = "LambDynamicLights ${project.mod_version} (${getMCVersionString()})"
-    uploadFile = shadowRemapJar
-    addGameVersion((String) project.minecraft_version)
-    addLoader('fabric')
-    versionType = isMCVersionNonRelease() ? VersionType.BETA : VersionType.RELEASE
-
-    // Changelog fetching
-    def changelogText = file('CHANGELOG.md').text
-    def regexVersion = ((String) project.mod_version).replaceAll('\\.', /\\./).replaceAll('\\+', '\\+')
-    def changelogRegex = ~"###? ${regexVersion}\\n\\n(( *- .+\\n)+)"
-    def matcher = changelogText =~ changelogRegex
-
-    if (matcher.find()) {
-        changelog = matcher.group(1)
-
-        def changelogLines = changelogText.split('\n')
-        def linkRefRegex = ~'^\\[([A-z0-9 _\\-/+.]+)]: '
-        for (int i = changelogLines.length - 1; i > 0; i--) {
-            def line = changelogLines[i]
-            if ((line =~ linkRefRegex).find())
-                changelog += '\n' + line
-            else break
-        }
-    }
-
-    // Readme
-    doFirst {
-        final def client = HttpClientBuilder.create().setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build()).build()
-        final def patch = new HttpPatch((String) (apiURL + '/v1/mod/' + projectId))
-        patch.addHeader("Authorization", token)
-
-        var json = new JsonObject()
-        json.addProperty("body", parseReadme())
-        patch.setEntity(EntityBuilder.create()
-                .setText(json.toString())
-                .setContentType(ContentType.APPLICATION_JSON)
-                .build())
-
-        final def response = client.execute(patch)
-        final int status = response.getStatusLine().getStatusCode()
-
-        final def gson = new GsonBuilder().create()
-        if (status == 200) {
-            project.getLogger().lifecycle("Successfully updated readme to ${projectId}.")
-        } else {
-            errorInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), ResponseError.class)
-            project.getLogger().error("Upload failed! Status: ${status} Error: ${errorInfo.getError()} Reason: ${errorInfo.getDescription()}")
-            throw new GradleException("Upload failed! Status: ${status} Reason: ${errorInfo.getDescription()}")
-        }
-    }
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    archiveClassifier.set('javadoc')
 }
 
-// configure the maven publication
+artifacts {
+    archives jar, sourcesJar, javadocJar
+}
+
 publishing {
+    tasks.publish.dependsOn 'build'
     publications {
         mavenJava(MavenPublication) {
-            from components.java
-
-            pom {
-                name = "LambDynamicLights"
-                description = "Adds dynamic lights to the game."
-            }
+            artifact jar
         }
     }
 
     repositories {
-        mavenLocal()
-        maven {
-            name = 'BuildDirLocal'
-            url = "$buildDir/repo"
-        }
-        maven {
-            name = 'GithubPackages'
-            url = uri('https://maven.pkg.github.com/LambdAurora/LambDynamicLights')
-            credentials {
-                username = project.findProperty('gpr.user') ?: System.getenv('USERNAME')
-                password = project.findProperty('gpr.key') ?: System.getenv('TOKEN')
-            }
-        }
-
-        def ldlMaven = System.getenv('LDL_MAVEN')
-        if (ldlMaven) {
-            maven {
-                name = 'LambDynamicLightsMaven'
-                url = uri(ldlMaven)
-                credentials {
-                    username = project.findProperty('gpr.user') ?: System.getenv('MAVEN_USERNAME')
-                    password = project.findProperty('gpr.key') ?: System.getenv('MAVEN_PASSWORD')
-                }
-            }
+        if (project.hasProperty('mavendir')) {
+            maven { url mavendir }
         }
     }
 }

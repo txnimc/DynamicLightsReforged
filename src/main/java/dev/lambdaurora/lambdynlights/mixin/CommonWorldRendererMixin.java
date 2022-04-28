@@ -11,29 +11,38 @@ package dev.lambdaurora.lambdynlights.mixin;
 
 import dev.lambdaurora.lambdynlights.LambDynLights;
 import dev.lambdaurora.lambdynlights.accessor.WorldRendererAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
+import dev.lambdaurora.lambdynlights.config.QualityMode;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = WorldRenderer.class, priority = 900)
+@Mixin(value = LevelRenderer.class, priority = 900)
 public abstract class CommonWorldRendererMixin implements WorldRendererAccessor {
-	@Invoker("scheduleChunkRender")
+
+	@Invoker("setSectionDirty")
 	@Override
-	public abstract void lambdynlights$scheduleChunkRebuild(int x, int y, int z, boolean important);
+	public abstract void dynlights_setSectionDirty(int x, int y, int z, boolean important);
 
 	@Inject(
-			method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I",
+			method = "getLightColor(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)I",
 			at = @At("TAIL"),
 			cancellable = true
 	)
-	private static void onGetLightmapCoordinates(BlockRenderView world, BlockState state, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-		if (!world.getBlockState(pos).isOpaqueFullCube(world, pos) && LambDynLights.get().config.getDynamicLightsMode().isEnabled())
-			cir.setReturnValue(LambDynLights.get().getLightmapWithDynamicLight(pos, cir.getReturnValue()));
+	private static void onGetLightmapCoordinates(BlockAndTintGetter world, BlockState j, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
+		if (!world.getBlockState(pos).isSolidRender(world, pos) && DynamicLightsConfig.Quality.get() != QualityMode.OFF)
+		{
+			int vanilla = cir.getReturnValue();
+			int value = LambDynLights.get().getLightmapWithDynamicLight(pos, vanilla);
+
+			cir.setReturnValue(value);
+		}
+
 	}
 }

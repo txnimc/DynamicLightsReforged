@@ -9,19 +9,21 @@
 
 package dev.lambdaurora.lambdynlights.api.item;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.lambdaurora.lambdynlights.LambDynLights;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Represents an item light sources manager.
@@ -47,13 +49,13 @@ public final class ItemLightSources {
 	public static void load(@NotNull ResourceManager resourceManager) {
 		ITEM_LIGHT_SOURCES.clear();
 
-		resourceManager.findResources("dynamiclights/item", path -> path.endsWith(".json")).forEach(id -> load(resourceManager, id));
+		resourceManager.listResources("dynamiclights/item", path -> path.endsWith(".json")).forEach(id -> load(resourceManager, id));
 
 		ITEM_LIGHT_SOURCES.addAll(STATIC_ITEM_LIGHT_SOURCES);
 	}
 
-	private static void load(@NotNull ResourceManager resourceManager, @NotNull Identifier resourceId) {
-		var id = new Identifier(resourceId.getNamespace(), resourceId.getPath().replace(".json", ""));
+	private static void load(@NotNull ResourceManager resourceManager, @NotNull ResourceLocation resourceId) {
+		var id = new ResourceLocation(resourceId.getNamespace(), resourceId.getPath().replace(".json", ""));
 		try {
 			var stream = resourceManager.getResource(resourceId).getInputStream();
 			var json = JSON_PARSER.parse(new InputStreamReader(stream)).getAsJsonObject();
@@ -76,7 +78,7 @@ public final class ItemLightSources {
 		for (var other : ITEM_LIGHT_SOURCES) {
 			if (other.item() == data.item()) {
 				LambDynLights.get().warn("Failed to register item light source \"" + data.id() + "\", duplicates item \""
-						+ Registry.ITEM.getId(data.item()) + "\" found in \"" + other.id() + "\".");
+						+ Registry.ITEM.getKey(data.item()) + "\" found in \"" + other.id() + "\".");
 				return;
 			}
 		}
@@ -93,7 +95,7 @@ public final class ItemLightSources {
 		for (var other : STATIC_ITEM_LIGHT_SOURCES) {
 			if (other.item() == data.item()) {
 				LambDynLights.get().warn("Failed to register item light source \"" + data.id() + "\", duplicates item \""
-						+ Registry.ITEM.getId(data.item()) + "\" found in \"" + other.id() + "\".");
+						+ Registry.ITEM.getKey(data.item()) + "\" found in \"" + other.id() + "\".");
 				return;
 			}
 		}
@@ -115,7 +117,7 @@ public final class ItemLightSources {
 			}
 		}
 		if (stack.getItem() instanceof BlockItem blockItem)
-			return ItemLightSource.BlockItemLightSource.getLuminance(stack, blockItem.getBlock().getDefaultState());
+			return ItemLightSource.BlockItemLightSource.getLuminance(stack, blockItem.getBlock().defaultBlockState());
 		else return 0;
 	}
 }
