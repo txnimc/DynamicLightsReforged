@@ -32,7 +32,7 @@ public abstract class LivingEntityMixin extends Entity implements DynamicLightSo
 	}
 
 	@Override
-	public void dynamicLightTick() {
+	public void tdv$dynamicLightTick() {
 		if (!DynamicLightsConfig.TileEntityLighting.get() || !DynamicLightHandlers.canLightUp(this)) {
 			this.lambdynlights$luminance = 0;
 			return;
@@ -58,7 +58,7 @@ public abstract class LivingEntityMixin extends Entity implements DynamicLightSo
 	}
 
 	@Override
-	public int getLuminance() {
+	public int tdv$getLuminance() {
 		return this.lambdynlights$luminance;
 	}
 }

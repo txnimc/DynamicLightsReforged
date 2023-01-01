@@ -9,13 +9,12 @@
 
 package dev.lambdaurora.lambdynlights.api.item;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.lambdaurora.lambdynlights.LambDynLights;
+import net.minecraft.server.packs.resources.Resource;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,16 +48,19 @@ public final class ItemLightSources {
 	public static void load(@NotNull ResourceManager resourceManager) {
 		ITEM_LIGHT_SOURCES.clear();
 
-		resourceManager.listResources("dynamiclights/item", path -> path.endsWith(".json")).forEach(id -> load(resourceManager, id));
+		resourceManager.listResources("dynamiclights/item", path -> path.getPath().endsWith(".json")).forEach((id, resource) ->
+		{
+			load(resourceManager, id, resource);
+		});
 
 		ITEM_LIGHT_SOURCES.addAll(STATIC_ITEM_LIGHT_SOURCES);
 	}
 
-	private static void load(@NotNull ResourceManager resourceManager, @NotNull ResourceLocation resourceId) {
+	private static void load(@NotNull ResourceManager resourceManager, @NotNull ResourceLocation resourceId, Resource resource) {
 		var id = new ResourceLocation(resourceId.getNamespace(), resourceId.getPath().replace(".json", ""));
+
 		try {
-			var stream = resourceManager.getResource(resourceId).getInputStream();
-			var json = JSON_PARSER.parse(new InputStreamReader(stream)).getAsJsonObject();
+			var json = JSON_PARSER.parse(new InputStreamReader(resource.open())).getAsJsonObject();
 
 			ItemLightSource.fromJson(id, json).ifPresent(data -> {
 				if (!STATIC_ITEM_LIGHT_SOURCES.contains(data))

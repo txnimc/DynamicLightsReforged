@@ -51,19 +51,19 @@ public abstract class TntEntityMixin extends Entity implements DynamicLightSourc
 				return;
 
 			if (this.isRemoved()) {
-				this.setDynamicLightEnabled(false);
+				this.tdv$setDynamicLightEnabled(false);
 			} else {
 				if (!DynamicLightsConfig.TileEntityLighting.get() || !DynamicLightHandlers.canLightUp(this))
-					this.resetDynamicLight();
+					this.tdv$resetDynamicLight();
 				else
-					this.dynamicLightTick();
+					this.tdv$dynamicLightTick();
 				LambDynLights.updateTracking(this);
 			}
 		}
 	}
 
 	@Override
-	public void dynamicLightTick() {
+	public void tdv$dynamicLightTick() {
 		if (this.isOnFire()) {
 			this.lambdynlights$luminance = 15;
 		} else {
@@ -77,7 +77,7 @@ public abstract class TntEntityMixin extends Entity implements DynamicLightSourc
 	}
 
 	@Override
-	public int getLuminance() {
+	public int tdv$getLuminance() {
 		return this.lambdynlights$luminance;
 	}
 }

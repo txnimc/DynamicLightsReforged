@@ -2,7 +2,6 @@ package dev.lambdaurora.lambdynlights.config;
 
 //import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 public enum QualityMode //implements TextProvider
 {

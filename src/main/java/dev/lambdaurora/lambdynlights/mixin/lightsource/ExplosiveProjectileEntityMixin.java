@@ -10,7 +10,6 @@
 package dev.lambdaurora.lambdynlights.mixin.lightsource;
 
 import dev.lambdaurora.lambdynlights.DynamicLightSource;
-import dev.lambdaurora.lambdynlights.LambDynLights;
 import dev.lambdaurora.lambdynlights.api.DynamicLightHandlers;
 import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
 import net.minecraft.world.entity.Entity;
@@ -26,13 +25,13 @@ public abstract class ExplosiveProjectileEntityMixin extends Entity implements D
 	}
 
 	@Override
-	public void dynamicLightTick() {
-		if (!this.isDynamicLightEnabled())
-			this.setDynamicLightEnabled(true);
+	public void tdv$dynamicLightTick() {
+		if (!this.tdv$isDynamicLightEnabled())
+			this.tdv$setDynamicLightEnabled(true);
 	}
 
 	@Override
-	public int getLuminance() {
+	public int tdv$getLuminance() {
 		if (DynamicLightsConfig.TileEntityLighting.get() && DynamicLightHandlers.canLightUp(this))
 			return 14;
 		return 0;

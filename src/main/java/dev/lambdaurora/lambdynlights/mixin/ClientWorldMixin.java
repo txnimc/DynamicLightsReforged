@@ -27,9 +27,8 @@ public abstract class ClientWorldMixin {
 	@Inject(method = "removeEntity", at = @At("HEAD"))
 	private void onFinishRemovingEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo ci) {
 		var entity = this.getEntities().get(entityId);
-		if (entity != null) {
-			var dls = (DynamicLightSource) entity;
-			dls.setDynamicLightEnabled(false);
+		if (entity instanceof DynamicLightSource dls) {
+			dls.tdv$setDynamicLightEnabled(false);
 		}
 	}
 }

@@ -25,8 +25,6 @@ public interface DynamicLightHandlerHolder<T> {
 
 	void lambdynlights$setDynamicLightHandler(DynamicLightHandler<T> handler);
 
-	Component lambdynlights$getName();
-
 	@SuppressWarnings("unchecked")
 	static <T extends Entity> DynamicLightHandlerHolder<T> cast(EntityType<T> entityType) {
 		return (DynamicLightHandlerHolder<T>) entityType;

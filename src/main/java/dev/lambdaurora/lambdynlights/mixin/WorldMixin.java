@@ -10,7 +10,6 @@
 package dev.lambdaurora.lambdynlights.mixin;
 
 import dev.lambdaurora.lambdynlights.DynamicLightSource;
-import dev.lambdaurora.lambdynlights.LambDynLights;
 import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,7 +43,7 @@ public abstract class WorldMixin {
 		if (this.isClientSide() && DynamicLightsConfig.TileEntityLighting.get()) {
 			var blockEntity = this.getBlockEntity(blockEntityTickInvoker.getPos());
 			if (blockEntity != null)
-				((DynamicLightSource) blockEntity).dynamicLightTick();
+				((DynamicLightSource) blockEntity).tdv$dynamicLightTick();
 		}
 	}
 }

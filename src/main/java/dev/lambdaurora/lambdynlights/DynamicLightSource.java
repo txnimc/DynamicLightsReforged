@@ -27,35 +27,35 @@ public interface DynamicLightSource {
 	 *
 	 * @return the X coordinate
 	 */
-	double getDynamicLightX();
+	double tdv$getDynamicLightX();
 
 	/**
 	 * Returns the dynamic light source Y coordinate.
 	 *
 	 * @return the Y coordinate
 	 */
-	double getDynamicLightY();
+	double tdv$getDynamicLightY();
 
 	/**
 	 * Returns the dynamic light source Z coordinate.
 	 *
 	 * @return the Z coordinate
 	 */
-	double getDynamicLightZ();
+	double tdv$getDynamicLightZ();
 
 	/**
 	 * Returns the dynamic light source world.
 	 *
 	 * @return the world instance
 	 */
-	Level getDynamicLightWorld();
+	Level tdv$getDynamicLightWorld();
 
 	/**
 	 * Returns whether the dynamic light is enabled or not.
 	 *
 	 * @return {@code true} if the dynamic light is enabled, else {@code false}
 	 */
-	default boolean isDynamicLightEnabled() {
+	default boolean tdv$isDynamicLightEnabled() {
 		return LambDynLights.isEnabled() && LambDynLights.get().containsLightSource(this);
 	}
 
@@ -67,15 +67,15 @@ public interface DynamicLightSource {
 	 * @param enabled {@code true} if the dynamic light is enabled, else {@code false}
 	 */
 	@ApiStatus.Internal
-	default void setDynamicLightEnabled(boolean enabled) {
-		this.resetDynamicLight();
+	default void tdv$setDynamicLightEnabled(boolean enabled) {
+		this.tdv$resetDynamicLight();
 		if (enabled)
 			LambDynLights.get().addLightSource(this);
 		else
 			LambDynLights.get().removeLightSource(this);
 	}
 
-	void resetDynamicLight();
+	void tdv$resetDynamicLight();
 
 	/**
 	 * Returns the luminance of the light source.
@@ -83,21 +83,21 @@ public interface DynamicLightSource {
 	 *
 	 * @return the luminance of the light source
 	 */
-	int getLuminance();
+	int tdv$getLuminance();
 
 	/**
 	 * Executed at each tick.
 	 */
-	void dynamicLightTick();
+	void tdv$dynamicLightTick();
 
 	/**
 	 * Returns whether this dynamic light source should update.
 	 *
 	 * @return {@code true} if this dynamic light source should update, else {@code false}
 	 */
-	boolean shouldUpdateDynamicLight();
+	boolean tdv$shouldUpdateDynamicLight();
 
-	boolean lambdynlights$updateDynamicLight(@NotNull LevelRenderer renderer);
+	boolean tdv$lambdynlights$updateDynamicLight(@NotNull LevelRenderer renderer);
 
-	void lambdynlights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer);
+	void tdv$lambdynlights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer);
 }

@@ -57,37 +57,37 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 	private final LongOpenHashSet lambdynlights$trackedLitChunkPos = new LongOpenHashSet();
 
 	@Override
-	public double getDynamicLightX() {
+	public double tdv$getDynamicLightX() {
 		return this.worldPosition.getX() + 0.5;
 	}
 
 	@Override
-	public double getDynamicLightY() {
+	public double tdv$getDynamicLightY() {
 		return this.worldPosition.getY() + 0.5;
 	}
 
 	@Override
-	public double getDynamicLightZ() {
+	public double tdv$getDynamicLightZ() {
 		return this.worldPosition.getZ() + 0.5;
 	}
 
 	@Override
-	public Level getDynamicLightWorld() {
+	public Level tdv$getDynamicLightWorld() {
 		return this.level;
 	}
 
 	@Inject(method = "setRemoved", at = @At("TAIL"))
 	private void onRemoved(CallbackInfo ci) {
-		this.setDynamicLightEnabled(false);
+		this.tdv$setDynamicLightEnabled(false);
 	}
 
 	@Override
-	public void resetDynamicLight() {
+	public void tdv$resetDynamicLight() {
 		this.lastLuminance = 0;
 	}
 
 	@Override
-	public void dynamicLightTick() {
+	public void tdv$dynamicLightTick() {
 		// We do not want to update the entity on the server.
 		if (this.level == null || !this.level.isClientSide())
 			return;
@@ -95,21 +95,21 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 			this.luminance = DynamicLightHandlers.getLuminanceFrom((BlockEntity) (Object) this);
 			LambDynLights.updateTracking(this);
 
-			if (!this.isDynamicLightEnabled()) {
+			if (!this.tdv$isDynamicLightEnabled()) {
 				this.lastLuminance = 0;
 			}
 		}
 	}
 
 	@Override
-	public int getLuminance() {
+	public int tdv$getLuminance() {
 		return this.luminance;
 	}
 
 	private static long lambdynlights_lastUpdate = 0;
 
 	@Override
-	public boolean shouldUpdateDynamicLight() {
+	public boolean tdv$shouldUpdateDynamicLight() {
 		var mode = DynamicLightsConfig.Quality.get();
 		if (Objects.equals(mode, QualityMode.OFF))
 			return false;
@@ -128,11 +128,11 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 	}
 
 	@Override
-	public boolean lambdynlights$updateDynamicLight(@NotNull LevelRenderer renderer) {
-		if (!this.shouldUpdateDynamicLight())
+	public boolean tdv$lambdynlights$updateDynamicLight(@NotNull LevelRenderer renderer) {
+		if (!this.tdv$shouldUpdateDynamicLight())
 			return false;
 
-		int luminance = this.getLuminance();
+		int luminance = this.tdv$getLuminance();
 
 		if (luminance != this.lastLuminance) {
 			this.lastLuminance = luminance;
@@ -164,14 +164,14 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 			}
 
 			// Schedules the rebuild of chunks.
-			this.lambdynlights$scheduleTrackedChunksRebuild(renderer);
+			this.tdv$lambdynlights$scheduleTrackedChunksRebuild(renderer);
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public void lambdynlights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer) {
+	public void tdv$lambdynlights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer) {
 		if (this.level == Minecraft.getInstance().level)
 			for (long pos : this.lambdynlights$trackedLitChunkPos) {
 				LambDynLights.scheduleChunkRebuild(renderer, pos);

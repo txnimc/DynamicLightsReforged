@@ -3,6 +3,7 @@
   "package": "dev.lambdaurora.lambdynlights.mixin",
   "refmap": "dynamiclightsreforged.refmap.json",
   "compatibilityLevel": "JAVA_8",
+  "plugin": "dev.lambdaurora.lambdynlights.DynLightsMixinPlugin",
   "client": [
     "BlockEntityTypeMixin",
     "ClientWorldMixin",

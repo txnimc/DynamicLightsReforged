@@ -123,10 +123,15 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     implementation fg.deobf("curse.maven:rubidium-574856:3749094")
-    //runtimeOnly fg.deobf("curse.maven:oculus-581495:3770744")
+    runtimeOnly fg.deobf("curse.maven:oculus-581495:3770744")
     runtimeOnly fg.deobf("curse.maven:create-328085:3737418")
     runtimeOnly fg.deobf("curse.maven:flywheel-486392:3737402")
     runtimeOnly fg.deobf("curse.maven:jei-238222:3758750")
+
+    runtimeOnly fg.deobf("curse.maven:ars-401955:3800858")
+    runtimeOnly fg.deobf("curse.maven:curious-309927:3748873")
+    runtimeOnly fg.deobf("curse.maven:patchouli-306770:3729975")
+    runtimeOnly fg.deobf("curse.maven:geckolib3-388172:3785773")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
 }

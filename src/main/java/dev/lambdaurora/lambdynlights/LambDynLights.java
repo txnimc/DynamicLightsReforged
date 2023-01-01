@@ -11,17 +11,13 @@ package dev.lambdaurora.lambdynlights;
 
 import dev.lambdaurora.lambdynlights.accessor.WorldRendererAccessor;
 import dev.lambdaurora.lambdynlights.api.DynamicLightHandlers;
-import dev.lambdaurora.lambdynlights.api.DynamicLightsInitializer;
 import dev.lambdaurora.lambdynlights.api.item.ItemLightSources;
 import dev.lambdaurora.lambdynlights.config.DynamicLightsConfig;
-import dev.lambdaurora.lambdynlights.config.QualityMode;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
@@ -114,7 +110,7 @@ public class LambDynLights {
 
 			this.lightSourcesLock.readLock().lock();
 			for (var lightSource : this.dynamicLightSources) {
-				if (lightSource.lambdynlights$updateDynamicLight(renderer)) this.lastUpdateCount++;
+				if (lightSource.tdv$lambdynlights$updateDynamicLight(renderer)) this.lastUpdateCount++;
 			}
 			this.lightSourcesLock.readLock().unlock();
 		}
@@ -149,7 +145,7 @@ public class LambDynLights {
 	 */
 	public int getLightmapWithDynamicLight(@NotNull Entity entity, int lightmap) {
 		int posLightLevel = (int) this.getDynamicLightLevel(entity.blockPosition());
-		int entityLuminance = ((DynamicLightSource) entity).getLuminance();
+		int entityLuminance = ((DynamicLightSource) entity).tdv$getLuminance();
 
 		return this.getLightmapWithDynamicLight(Math.max(posLightLevel, entityLuminance), lightmap);
 	}
@@ -204,12 +200,12 @@ public class LambDynLights {
 	 * @return the dynamic light level at the specified position
 	 */
 	public static double maxDynamicLightLevel(@NotNull BlockPos pos, @NotNull DynamicLightSource lightSource, double currentLightLevel) {
-		int luminance = lightSource.getLuminance();
+		int luminance = lightSource.tdv$getLuminance();
 		if (luminance > 0) {
 			// Can't use Entity#squaredDistanceTo because of eye Y coordinate.
-			double dx = pos.getX() - lightSource.getDynamicLightX() + 0.5;
-			double dy = pos.getY() - lightSource.getDynamicLightY() + 0.5;
-			double dz = pos.getZ() - lightSource.getDynamicLightZ() + 0.5;
+			double dx = pos.getX() - lightSource.tdv$getDynamicLightX() + 0.5;
+			double dy = pos.getY() - lightSource.tdv$getDynamicLightY() + 0.5;
+			double dz = pos.getZ() - lightSource.tdv$getDynamicLightZ() + 0.5;
 
 			double distanceSquared = dx * dx + dy * dy + dz * dz;
 			// 7.75 because else we would have to update more chunks and that's not a good idea.
@@ -231,7 +227,7 @@ public class LambDynLights {
 	 * @param lightSource the light source to add
 	 */
 	public void addLightSource(@NotNull DynamicLightSource lightSource) {
-		if (!lightSource.getDynamicLightWorld().isClientSide())
+		if (!lightSource.tdv$getDynamicLightWorld().isClientSide())
 			return;
 		if (!isEnabled())
 			return;
@@ -249,7 +245,7 @@ public class LambDynLights {
 	 * @return {@code true} if the light source is tracked, else {@code false}
 	 */
 	public boolean containsLightSource(@NotNull DynamicLightSource lightSource) {
-		if (!lightSource.getDynamicLightWorld().isClientSide())
+		if (!lightSource.tdv$getDynamicLightWorld().isClientSide())
 			return false;
 
 		boolean result;
@@ -289,7 +285,7 @@ public class LambDynLights {
 			if (it.equals(lightSource)) {
 				dynamicLightSources.remove();
 				if (Minecraft.getInstance().levelRenderer != null)
-					lightSource.lambdynlights$scheduleTrackedChunksRebuild(Minecraft.getInstance().levelRenderer);
+					lightSource.tdv$lambdynlights$scheduleTrackedChunksRebuild(Minecraft.getInstance().levelRenderer);
 				break;
 			}
 		}
@@ -309,9 +305,9 @@ public class LambDynLights {
 			it = dynamicLightSources.next();
 			dynamicLightSources.remove();
 			if (Minecraft.getInstance().levelRenderer != null) {
-				if (it.getLuminance() > 0)
-					it.resetDynamicLight();
-				it.lambdynlights$scheduleTrackedChunksRebuild(Minecraft.getInstance().levelRenderer);
+				if (it.tdv$getLuminance() > 0)
+					it.tdv$resetDynamicLight();
+				it.tdv$lambdynlights$scheduleTrackedChunksRebuild(Minecraft.getInstance().levelRenderer);
 			}
 		}
 
@@ -333,9 +329,9 @@ public class LambDynLights {
 			if (filter.test(it)) {
 				dynamicLightSources.remove();
 				if (Minecraft.getInstance().levelRenderer != null) {
-					if (it.getLuminance() > 0)
-						it.resetDynamicLight();
-					it.lambdynlights$scheduleTrackedChunksRebuild(Minecraft.getInstance().levelRenderer);
+					if (it.tdv$getLuminance() > 0)
+						it.tdv$resetDynamicLight();
+					it.tdv$lambdynlights$scheduleTrackedChunksRebuild(Minecraft.getInstance().levelRenderer);
 				}
 				break;
 			}
@@ -438,13 +434,13 @@ public class LambDynLights {
 	 * @param lightSource the light source
 	 */
 	public static void updateTracking(@NotNull DynamicLightSource lightSource) {
-		boolean enabled = lightSource.isDynamicLightEnabled();
-		int luminance = lightSource.getLuminance();
+		boolean enabled = lightSource.tdv$isDynamicLightEnabled();
+		int luminance = lightSource.tdv$getLuminance();
 
 		if (!enabled && luminance > 0) {
-			lightSource.setDynamicLightEnabled(true);
+			lightSource.tdv$setDynamicLightEnabled(true);
 		} else if (enabled && luminance < 1) {
-			lightSource.setDynamicLightEnabled(false);
+			lightSource.tdv$setDynamicLightEnabled(false);
 		}
 	}
 
