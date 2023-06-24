@@ -42,8 +42,8 @@ public abstract class LivingEntityMixin extends Entity implements DynamicLightSo
 			this.lambdynlights$luminance = 15;
 		} else {
 			int luminance = 0;
-			var eyePos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
-			boolean submergedInFluid = !this.level.getFluidState(eyePos).isEmpty();
+			var eyePos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
+			boolean submergedInFluid = !this.level().getFluidState(eyePos).isEmpty();
 			for (var equipped : this.getAllSlots()) {
 				if (!equipped.isEmpty())
 					luminance = Math.max(luminance, LambDynLights.getLuminanceFromItemStack(equipped, submergedInFluid));

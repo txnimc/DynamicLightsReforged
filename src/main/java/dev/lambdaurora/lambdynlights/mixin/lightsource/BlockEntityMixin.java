@@ -138,9 +138,9 @@ public abstract class BlockEntityMixin implements DynamicLightSource {
 			this.lastLuminance = luminance;
 
 			if (this.lambdynlights$trackedLitChunkPos.isEmpty()) {
-				var chunkPos = new BlockPos.MutableBlockPos(Mth.intFloorDiv(this.worldPosition.getX(), 16),
-						Mth.intFloorDiv(this.worldPosition.getY(), 16),
-						Mth.intFloorDiv(this.worldPosition.getZ(), 16));
+				var chunkPos = new BlockPos.MutableBlockPos(Mth.floorDiv(this.worldPosition.getX(), 16),
+						Mth.floorDiv(this.worldPosition.getY(), 16),
+						Mth.floorDiv(this.worldPosition.getZ(), 16));
 
 				LambDynLights.updateTrackedChunks(chunkPos, null, this.lambdynlights$trackedLitChunkPos);
 

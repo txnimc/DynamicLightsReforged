@@ -12,6 +12,7 @@ package dev.lambdaurora.lambdynlights.api.item;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import dev.lambdaurora.lambdynlights.LambDynLights;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -100,7 +101,7 @@ public abstract class ItemLightSource {
 		}
 
 		var affectId = new ResourceLocation(json.get("item").getAsString());
-		var item = Registry.ITEM.get(affectId);
+		var item = ForgeRegistries.ITEMS.getValue(affectId);
 
 		if (item == Items.AIR)
 			return Optional.empty();
@@ -121,7 +122,7 @@ public abstract class ItemLightSource {
 			} else {
 				var blockId = ResourceLocation.tryParse(luminanceStr);
 				if (blockId != null) {
-					var block = Registry.BLOCK.get(blockId);
+					var block = ForgeRegistries.BLOCKS.getValue(blockId);
 					if (block != Blocks.AIR)
 						return Optional.of(new BlockItemLightSource(id, item, block.defaultBlockState(), waterSensitive));
 				}

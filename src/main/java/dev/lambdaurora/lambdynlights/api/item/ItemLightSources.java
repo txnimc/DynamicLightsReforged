@@ -12,6 +12,7 @@ package dev.lambdaurora.lambdynlights.api.item;
 import com.google.gson.JsonParser;
 import dev.lambdaurora.lambdynlights.LambDynLights;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -80,7 +81,7 @@ public final class ItemLightSources {
 		for (var other : ITEM_LIGHT_SOURCES) {
 			if (other.item() == data.item()) {
 				LambDynLights.get().warn("Failed to register item light source \"" + data.id() + "\", duplicates item \""
-						+ Registry.ITEM.getKey(data.item()) + "\" found in \"" + other.id() + "\".");
+						+ ForgeRegistries.ITEMS.getKey(data.item()) + "\" found in \"" + other.id() + "\".");
 				return;
 			}
 		}
@@ -97,7 +98,7 @@ public final class ItemLightSources {
 		for (var other : STATIC_ITEM_LIGHT_SOURCES) {
 			if (other.item() == data.item()) {
 				LambDynLights.get().warn("Failed to register item light source \"" + data.id() + "\", duplicates item \""
-						+ Registry.ITEM.getKey(data.item()) + "\" found in \"" + other.id() + "\".");
+						+ ForgeRegistries.ITEMS.getKey(data.item()) + "\" found in \"" + other.id() + "\".");
 				return;
 			}
 		}
