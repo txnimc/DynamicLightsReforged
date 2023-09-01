@@ -25,7 +25,6 @@ public final class DynLightsMixinPlugin implements IMixinConfigPlugin
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName)
     {
-        System.out.println(targetClassName + " --- " + mixinClassName);
         return true;
     }
 

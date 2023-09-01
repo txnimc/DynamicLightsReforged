@@ -23,5 +23,10 @@
     "lightsource.PlayerEntityMixin",
     "lightsource.TntEntityMixin",
     "sodium.SodiumSettingsMixin"
+  ],
+  "mixins": [
+    "sodium.ArrayLightDataCacheMixin",
+    "sodium.FlatLightPipelineMixin",
+    "sodium.LightDataAccessMixin"
   ]
 }
