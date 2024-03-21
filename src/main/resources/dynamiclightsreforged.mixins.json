@@ -24,6 +24,7 @@
     "lightsource.TntEntityMixin",
     "sodium.SodiumSettingsMixin"
   ],
+  "minVersion": "0.7",
   "mixins": [
     "sodium.ArrayLightDataCacheMixin",
     "sodium.FlatLightPipelineMixin",
